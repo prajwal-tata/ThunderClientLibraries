@@ -1996,7 +1996,7 @@ static uint32_t WidthFromResolution (Exchange::IComposition::ScreenResolution co
                                                                     _width = 720; break;
         case Exchange::IComposition::ScreenResolution_720p      :   // 1280x720 progressive
         case Exchange::IComposition::ScreenResolution_720p50Hz  :   // 1280x720 @ 50 Hz
-                                                                    _width = 720; break;
+                                                                    _width = 1280; break;
         case Exchange::IComposition::ScreenResolution_1080p24Hz :   // 1920x1080 progressive @ 24 Hz
         case Exchange::IComposition::ScreenResolution_1080i50Hz :   // 1920x1080 interlaced  @ 50 Hz
         case Exchange::IComposition::ScreenResolution_1080p50Hz :   // 1920x1080 progressive @ 50 Hz
