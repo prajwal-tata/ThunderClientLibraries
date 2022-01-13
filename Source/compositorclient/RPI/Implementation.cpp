@@ -1280,7 +1280,7 @@ private:
 
 
 // TODO:
-                constexpr bool _enable = true;
+                constexpr bool _enable = false;
 
                 if ( ( _narrowing < n_width_t, e_width_t, _enable > :: value
                       && _narrowing < n_height_t, e_height_t, _enable > :: value ) != false
@@ -1921,8 +1921,6 @@ int Display::Process(const uint32_t)
     static decltype (_milli) _rate = RefreshRateFromResolution ( ( _remoteDisplay != nullptr ? _remoteDisplay->Resolution () : Exchange::IComposition::ScreenResolution_Unknown ) );
     static std::chrono::milliseconds _delay = std::chrono::milliseconds (_milli / _rate);
 
-// TODO: move to scanout ?
-
     // Delay the (free running) loop
     auto _current_time = std::chrono::steady_clock::now ();
 
@@ -1931,33 +1929,30 @@ int Display::Process(const uint32_t)
     auto _duration = std::chrono::duration_cast < std::chrono::milliseconds > (_current_time - _last_access_time);
 
     if (_duration.count () < _delay .count () ) {
-        std::this_thread::sleep_for( std::chrono::milliseconds (_delay - _duration) );
-    }
-    else {
+        // skip frame, the client is creating frames at a too high rate
+	std::this_thread::sleep_for( std::chrono::milliseconds (_delay - _duration) );
     }
 
-    _last_access_time = _current_time;
-
-    // Scan out all surfaces belonging to this display
+        // Scan out all surfaces belonging to this display
 // TODO: only scan out the surface that actually has completed or the client should be made aware that all surfaces should be completed at the time of calling
 // TODO: This flow introduces artefacts
-    for (auto _begin = _surfaces.begin (), _it = _begin, _end = _surfaces.end (); _it != _end; _it++) {
+    _last_access_time = _current_time;
 
+    for (auto _begin = _surfaces.begin (), _it = _begin, _end = _surfaces.end (); _it != _end; _it++) {
         // THe way the API has been constructed limits the optimal syncing strategy
 
         (*_it)->PreScanOut ();  // will render
 
-        // At least fails the very first time
+            // At least fails the very first time
         bool  ret = (*_it)->SyncPrimitiveEnd ();
-//            assert (ret != false);
+//        assert (ret != false);
 
-        (*_it)->ScanOut ();     // actual scan out (at the remote site)
+        (*_it)->ScanOut (); // actual scan out (at the remote site)
 
         ret = (*_it)->SyncPrimitiveStart ();
-//            assert (ret != false);
+//        assert (ret != false);
 
         (*_it)->PostScanOut (); // rendered
-
     }
 
     return (0);
